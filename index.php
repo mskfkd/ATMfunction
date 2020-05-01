@@ -33,34 +33,52 @@ class Controll {
 	}
 
 	public function res() {
-		return $this->customer;
+		return true;
 	}
 }
 
 //暗証番号
 class Authhentication {
+	private $pin;
 
+	function __construct() {
+		echo "暗証番号数字4桁を入力してください。" . "\n";
+	}
+
+	public function getPin($pin) {
+		$this->pin = $pin;
+	}
+
+	public function check() {
+		if(!isset($this->pin)) {
+		echo "暗証番号数字4桁を入力してください。" . "\n";
+		return false;
+		}
+
+		if(strlen($this->pin) !== 4) {
+			echo "4桁で入力してください。" . "\n";
+		}
+	}
+
+	public function setpin() {
+		return true;
+	}
 }
 
-//入金
-class Deposit {
 
-}
-
-//引き出し
-class Withdrawal {
-
-}
-
-//振込
-class Wiretransfer {
-
-}
 
 $controll = new Controll;
 $input = trim(fgets(STDIN));
 $controll->guest($input);
 $controll->check();
-$controll->res();
+
+$authhentication = new Authhentication;
+if($controll->res() === true) {
+	$inputpin = trim(fgets(STDIN));
+	$authhentication->check($inputpin);
+	$authhentication->setpin();
+}else {
+	echo "エラーです" . "\n";
+}
 
 ?>
