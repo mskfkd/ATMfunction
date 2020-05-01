@@ -42,11 +42,6 @@ class Authhentication {
 
 }
 
-//残高確認
-class Balance {
-
-}
-
 //入金
 class Deposit {
 
