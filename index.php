@@ -65,6 +65,7 @@ class Authhentication {
 	}
 }
 
+//選択
 $controll = new Controll;
 $input = trim(fgets(STDIN));
 $controll->guest($input);
@@ -75,16 +76,12 @@ $authhentication = new Authhentication;
 if($controll->res() === true) {
 	$inputpin = trim(fgets(STDIN));
 	$authhentication->setcheck($inputpin);
-	$authhentication->pinjudge();
-	// if ($authhentication->pinjudge() === true) {
-	// 	$pinjudge = true;
-	// }else {
-	// 	$pinjudge = false;
-	// }
-}
-// var_dump($authhentication);
+	$pinjudge = $authhentication->pinjudge();
 
-// if ($pinjudge === true) {
+}
+
+//選択後の操作
+if ($pinjudge === true) {
 	if ($input === 1) { //残高参照
 		require("balancecheck.php");
 		$balance = new Balance;
@@ -98,13 +95,32 @@ if($controll->res() === true) {
 		$deposit->getDeposit($inputPlus);
 		$deposit->setBalanceAns();
 	}elseif ($input === 3) { //引き出し
-		# code...
+		require("withdrawal.php");
+		$withdrawal = new Withdrawal;
+		$exportMinus = trim(fgets(STDIN));
+		$withdrawal->getRemaining();
+		$withdrawal->getWithdrawal($exportMinus);
+		$withdrawal->setWithdrawal();
+		$withdrawal->setBalanceAns();
 	}elseif ($input === 4) { //振込
-		# code...
+		require("wiretransfer.php");
+		$wiretransfer = new Wiretransfer;
+		$inputBank = trim(fgets(STDIN));
+		$wiretransfer->getBank($inputBank);
+		$wiretransfer->setBank();
+		$wiretransfer->getBranch();
+		$wiretransfer->setBranch();
+		$wiretransfer->getAccount();
+		$wiretransfer->setAccount();
+		$wiretransfer->comfirm();
+		$wiretransfer->getRemaining();
+		$wiretransfer->getWiretransfer();
+		$wiretransfer->setWiretransfer();
+		$wiretransfer->setBalanceAns();
 	}
-// }else {
-// 	echo "エラーです" . "\n";
-// }
+}else {
+	echo "エラーです" . "\n";
+}
 
 
 ?>
