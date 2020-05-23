@@ -81,19 +81,19 @@ class ATM {
 ​
 		switch ($menu) {
 			case self::BALANCE:
-				$this->DefineBalance();
-				$this->balance();
-				break;
+			$this->DefineBalance();
+			$this->balance();
+			break;
 ​
 			case self::DEPOSIT:
-				$this->DefineDeposit();
-				$this->deposit();
-				break;
+			$this->DefineDeposit();
+			$this->deposit();
+			break;
 			
 			case self::WITHDRAWL:
-				$this->Definewithdrawl();
-				$this->withdrawl();
-				break;
+			$this->Definewithdrawl();
+			$this->withdrawl();
+			break;
 ​
 		}
 	}
