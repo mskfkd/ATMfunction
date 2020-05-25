@@ -4,30 +4,37 @@ class ATM {
 	const DEPOSIT = 2;
 	const WITHDRAWL = 3;
 
-	// public $menu;
 	public $balance = 10000;
 	public $deposit;
 	public $withdrawl;
 
+	public function __construct() {
+		echo "いらっしゃいませ。1.残高照会 2.入金 3.引き出しの中から選択してください。";
+	}
+
 	public function selectMenu() {
 		$input = rtrim(fgets(STDIN));
-		$this->check($input);
-		// var_dump($this->check($input));
+		$checkres = $this->check($input);
 
-		return $input;
+		if($checkres === true) {
+			return $input;
+		}else{
+			return selectMenu();
+		}
 	}
 
 	public function check($input) {
 		if (!isset($input)) {
 			echo "1~3のいずれかを入力してください" . "\n";
-			return selectMenu();
+			return false;
 		}
 
 		if ($input === 0 || $input >= 4) {
 			echo "1~3のいずれかで選択し直してください" . "\n";
-			return selectMenu();
+			return false;
 		}
 
+		return true;
 	}
 
 	public function balance() {
@@ -36,34 +43,39 @@ class ATM {
 	}
 
 	public function deposit() {
+		echo "いくら入金しますか?";
 		$deposit = $this->deposit;
 		$this->deposit = rtrim(fgets(STDIN));
-		echo $this->deposit . "円入金しました";
+		echo $this->deposit . "円入金しました" . "\n";
+		$this->balance = $this->balance + $this->deposit;
+		echo "残高は" . $this->balance . "です。" . "\n";
 	}
 
 	public function withdrawl() {
+		echo "いくら出金しますか?";
 		$withdrawl = $this->withdrawl;
 		$this->withdrawl = rtrim(fgets(STDIN));
 		echo $this->withdrawl . "円引き出しました";
+		$this->balance = $this->balance - $this->withdrawl;
+		echo "残高は" . $this->balance . "です。" . "\n";
 	}
 
 	public function main() {
 		//メニュー選択
 		$menu = $this->selectMenu();
-// 		var_dump($menu);
 
 		switch ($menu) {
 			case self::BALANCE:
-				$this->balance();
-				break;
+			$this->balance();
+			break;
 
 			case self::DEPOSIT:
-				$this->deposit();
-				break;
+			$this->deposit();
+			break;
 			
 			case self::WITHDRAWL:
-				$this->withdrawl();
-				break;
+			$this->withdrawl();
+			break;
 
 		}
 	}
