@@ -8,23 +8,41 @@ class ATM {
 	public $deposit;
 	public $withdrawl;
 
-	public function __construct() {
-		echo "いらっしゃいませ。1.残高照会 2.入金 3.引き出しの中から選択してください。";
+	public function main() {
+		//メニュー選択
+		$menu = $this->selectMenu();
+
+		switch ($menu) {
+			case self::BALANCE:
+			$this->balance();
+			break;
+
+			case self::DEPOSIT:
+			$this->deposit();
+			break;
+			
+			case self::WITHDRAWL:
+			$this->withdrawl();
+			break;
+
+		}
 	}
 
 	public function selectMenu() {
+		echo "いらっしゃいませ。1.残高照会 2.入金 3.引き出しの中から選択してください。";
+		
 		$input = rtrim(fgets(STDIN));
 		$checkres = $this->check($input);
 
 		if($checkres === true) {
 			return $input;
 		}else{
-			return selectMenu();
+			return $this->selectMenu();
 		}
 	}
 
 	public function check($input) {
-		if (!isset($input)) {
+		if (empty($input)) {
 			echo "1~3のいずれかを入力してください" . "\n";
 			return false;
 		}
@@ -60,25 +78,6 @@ class ATM {
 		echo "残高は" . $this->balance . "です。" . "\n";
 	}
 
-	public function main() {
-		//メニュー選択
-		$menu = $this->selectMenu();
-
-		switch ($menu) {
-			case self::BALANCE:
-			$this->balance();
-			break;
-
-			case self::DEPOSIT:
-			$this->deposit();
-			break;
-			
-			case self::WITHDRAWL:
-			$this->withdrawl();
-			break;
-
-		}
-	}
 }
 
 $atm = new ATM;
