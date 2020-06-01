@@ -1,12 +1,81 @@
 <?php
+
+//ログイン情報
+class User {
+	static public $user_list = array(
+		1 => array(
+			"id" => "1",
+			"password" => "1234",
+			"name" => "tanaka",
+			"balance" => "100000"
+		),
+		2 =>array(
+			"id" => "2",
+			"password" => "3456",
+			"name" => "suzuki",
+			"balance" => "150000"
+		)
+	);
+}
+
+//ATM機能
 class ATM {
 	const BALANCE = 1;
 	const DEPOSIT = 2;
 	const WITHDRAWL = 3;
 
-	public $balance = 10000;
+	public $user_list;
+	public $id;
+	public $name;
+	public $pass;
+	public $getId;
+	public $getPass;
+	public $getuser;
+	public $user;
+	public $balance;
 	public $deposit;
 	public $withdrawl;
+
+	public function __construct() {
+		//ログイン
+		$this->login();
+	}
+
+	public function login() {
+		//id入力
+		$id = $this->id;
+		echo "ユーザーIDを入力してください" . "\n";
+		$this->id = rtrim(fgets(STDIN));
+
+		//Userクラスのユーザーリストにidがあるかチェック
+          //なければエラー、再帰関数
+		$getId = User::$user_list[$this->id]["id"];
+		if ($getId !== $this->id) {
+			echo "IDが一致しません。" . "\n";
+			return $this->login();
+		}
+        //Userクラスから指定されたユーザー取得
+		$getuser = User::$user_list[$this->$id]["name"];
+		var_dump($getuser);
+
+        //パスワード取得
+		$pass = $this->pass;
+		echo "パスワードを入力してください" . "\n";
+		$this->pass = rtrim(fgets(STDIN));
+
+        //取得したユーザーのパスワードと入力値が一致するかチェック
+            //なければエラー、再帰関数
+		$getPass = User::$user_list[$this->id]["password"];
+		var_dump($getPass);
+		if ($getPass !== $this->pass) {
+			echo "パスワードが一致しません。" . "\n";
+			return $this->login();
+		}
+
+        //問題なければ、プロパティの$userにセット
+		$user = User::$user_list[$this->$id];
+		var_dump($user);
+	}
 
 	public function main() {
 		//メニュー選択
@@ -29,16 +98,16 @@ class ATM {
 	}
 
 	public function selectMenu() {
-		echo "いらっしゃいませ。1.残高照会 2.入金 3.引き出しの中から選択してください。";
+		echo "1.残高照会 2.入金 3.引き出しの中から選択してください。";
 		
 		$input = rtrim(fgets(STDIN));
 		$checkres = $this->check($input);
 
-		if($checkres === true) {
-			return $input;
-		}else{
+		if($checkres === false) {
 			return $this->selectMenu();
 		}
+		
+		return $input;
 	}
 
 	public function check($input) {
@@ -56,7 +125,9 @@ class ATM {
 	}
 
 	public function balance() {
+		$balance = $user["balance"];
 		$balance = $this->balance;
+		// var_dump($user["balance"]);
 		echo "残高は" . $this->balance . "円です";
 	}
 
