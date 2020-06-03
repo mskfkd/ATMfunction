@@ -2,6 +2,7 @@
 
 //ログイン情報
 class User {
+
 	static public $user_list = array(
 		1 => array(
 			"id" => "1",
@@ -16,6 +17,10 @@ class User {
 			"balance" => "150000"
 		)
 	);
+
+	public function getUserById($key) {
+		return User::$user_list[$key]["id"];
+	}
 }
 
 //ATM機能
@@ -24,10 +29,10 @@ class ATM {
 	const DEPOSIT = 2;
 	const WITHDRAWL = 3;
 
-	public $user_list;
-	public $id;
-	public $name;
-	public $pass;
+	// public $id;
+	// public $name;
+	// public $pass;
+	// public $input;
 	public $getId;
 	public $getPass;
 	public $getuser;
@@ -43,38 +48,54 @@ class ATM {
 
 	public function login() {
 		//id入力
-		$id = $this->id;
+		// $id = $this->id;
 		echo "ユーザーIDを入力してください" . "\n";
-		$this->id = rtrim(fgets(STDIN));
+		$inputID = rtrim(fgets(STDIN));
+		$inputRes = $this->checkId($inputID);
 
 		//Userクラスのユーザーリストにidがあるかチェック
           //なければエラー、再帰関数
-		$getId = User::$user_list[$this->id]["id"];
-		if ($getId !== $this->id) {
+		$user = new User;
+		$getId["id"] = $user->getUserById($inputID);
+		if ($getId["id"] !== $inputID) {
 			echo "IDが一致しません。" . "\n";
 			return $this->login();
 		}
+
         //Userクラスから指定されたユーザー取得
-		$getuser = User::$user_list[$this->$id]["name"];
-		var_dump($getuser);
+		$getuser["id"] = $user->getUserById($inputID);
+		// var_dump($getuser);
 
         //パスワード取得
-		$pass = $this->pass;
+		// $pass = $this->pass;
 		echo "パスワードを入力してください" . "\n";
-		$this->pass = rtrim(fgets(STDIN));
+		$inputPass = rtrim(fgets(STDIN));
+		$inputRes = $this->checkId($inputPass);
 
         //取得したユーザーのパスワードと入力値が一致するかチェック
             //なければエラー、再帰関数
-		$getPass = User::$user_list[$this->id]["password"];
+		$getPass = $getuser["password"];
 		var_dump($getPass);
-		if ($getPass !== $this->pass) {
+		if ($getPass !== $inputPass) {
 			echo "パスワードが一致しません。" . "\n";
 			return $this->login();
 		}
 
         //問題なければ、プロパティの$userにセット
-		$user = User::$user_list[$this->$id];
+		$user = $user->getUserById($inputID);
 		var_dump($user);
+	}
+
+	public function checkId($input) {
+		if (!isset($input)) {
+			echo "入力してください" . "\n";
+			return $this->login();
+		}
+
+		if (!is_numeric($input)) {
+			echo "数字で入力してください" . "\n";
+			return $this->login();
+		}
 	}
 
 	public function main() {
