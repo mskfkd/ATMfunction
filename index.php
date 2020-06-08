@@ -18,19 +18,18 @@ class User {
 		)
 	);
 
-	public function getUserById($key) {
-		var_dump(User::$user_list[$key]);
-		return User::$user_list[$key];
-		// return User::$user_list[$key]["id"];
+	public static function isExistUserId($inputID) {
+		if($inputID !== User::$user_list[$inputID]["id"]) {
+			echo "登録されているIDと一致しません" . "\n";
+			return false;
+		}
 	}
 
-	// public function getPassByUser($key2) {
-	// 	return User::$user_list[$key2]["password"];
-	// }
+	public function getUserById($key) {
+		var_dump(User::$user_list[$key]);
+		return User::$user_list[$key];		
+	}
 
-	// public function getBalanceByUser($key3) {
-	// 	return User::$user_list[$key3]["balance"];
-	// }
 }
 
 //ATM機能
@@ -39,10 +38,6 @@ class ATM {
 	const DEPOSIT = 2;
 	const WITHDRAWL = 3;
 
-	// public $id;
-	// public $name;
-	// public $pass;
-	// public $input;
 	public $getId;
 	public $getPass;
 	public $getuser;
@@ -58,35 +53,32 @@ class ATM {
 
 	public function login() {
 		//id入力
-		// $id = $this->id;
 		echo "ユーザーIDを入力してください" . "\n";
 		$inputID = rtrim(fgets(STDIN));
 		$inputRes = $this->checkId($inputID);
+		if ($inputRes === false) {
+			return login();
+		}
 
 		//Userクラスのユーザーリストにidがあるかチェック
           //なければエラー、再帰関数
-		$userclass = new User;
-		$getId = $userclass->getUserById($inputID)["id"];
-		var_dump($getId);
-		if ($getId !== $inputID) {
-			echo "IDが一致しません。" . "\n";
+		$storageID = User::isExistUserId($inputID);
+		if($storageID === false) {
 			return $this->login();
 		}
 
         //Userクラスから指定されたユーザー取得
-		// $getuser = $userclass->getUserById($inputID);
-		// var_dump($getuser);
+		$user = User::getUserById($inputID);
+		$getId = $user["id"];
 
         //パスワード取得
-		// $pass = $this->pass;
 		echo "パスワードを入力してください" . "\n";
 		$inputPass = rtrim(fgets(STDIN));
-		$inputRes = $this->checkId($inputPass);
+		$inputRes = $this->checkPass($inputPass);
 
         //取得したユーザーのパスワードと入力値が一致するかチェック
             //なければエラー、再帰関数
-		$getPass = $userclass->getUserById($inputID)["password"];
-		// $getPass = $userclass->getPassByUser($inputID);
+		$getPass = $user["password"];
 		var_dump($getPass);
 		if ($getPass !== $inputPass) {
 			echo "パスワードが一致しません。" . "\n";
@@ -94,20 +86,30 @@ class ATM {
 		}
 
         //問題なければ、プロパティの$userにセット
-		$user = $userclass->getUserById($inputID)["balance"];
 		$this->user = $user;
-		// var_dump($user);
 	}
 
-	public function checkId($input) {
-		if (!isset($input)) {
-			echo "入力してください" . "\n";
+	public function checkId($inputID) {
+		if (!isset($inputID)) {
+			echo "IDを入力してください" . "\n";
 			return $this->login();
 		}
 
-		if (!is_numeric($input)) {
-			echo "数字で入力してください" . "\n";
+		if (!is_numeric($inputID)) {
+			echo "IDは数字で入力してください" . "\n";
 			return $this->login();
+		}
+	}
+
+	public function checkPass($inputPass) {
+		if (!isset($inputPass)) {
+			echo "パスワードを入力してください" . "\n";
+			return $inputPass;
+		}
+
+		if (!is_numeric($inputPass)) {
+			echo "パスワードは数字で入力してください" . "\n";
+			return $inputPass;
 		}
 	}
 
@@ -160,9 +162,7 @@ class ATM {
 
 	public function balance() {
 
-		$balance = $this->user;
-		// $balance = $this->balance;
-		// var_dump($user["balance"]);
+		$balance = $this->user["balance"];
 		echo "残高は" . $balance . "円です";
 	}
 
@@ -171,7 +171,7 @@ class ATM {
 		$deposit = $this->deposit;
 		$this->deposit = rtrim(fgets(STDIN));
 		echo $this->deposit . "円入金しました" . "\n";
-		$balance = $this->user;
+		$balance = $this->user["balance"];
 		$balance = $balance + $this->deposit;
 		echo "残高は" . $balance . "です。" . "\n";
 	}
@@ -181,7 +181,7 @@ class ATM {
 		$withdrawl = $this->withdrawl;
 		$this->withdrawl = rtrim(fgets(STDIN));
 		echo $this->withdrawl . "円引き出しました";
-		$balance = $this->user;
+		$balance = $this->user["balance"];
 		$balance = $balance - $this->withdrawl;
 		echo "残高は" . $balance . "です。" . "\n";
 	}
