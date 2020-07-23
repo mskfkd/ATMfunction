@@ -1,9 +1,14 @@
 <?php
 
+require_once('validation/IDValidate.php');
+require_once('validation/PassValidate.php');
+require_once('validation/MenuValidate.php');
+require_once('validation/ReplayResValidate.php');
+
 //ログイン情報
 class User {
 
-	static public $user_list = array(
+	public $user_list = array(
 		1 => array(
 			"id" => "1",
 			"password" => "1234",
@@ -18,16 +23,15 @@ class User {
 		)
 	);
 
-	public static function isExistUserId($inputID) {
-		if($inputID !== User::$user_list[$inputID]["id"]) {
-			echo "登録されているIDと一致しません" . "\n";
+	public function isExistUserId($inputID) {
+		$user_list = $this->user_list;
+		if($inputID !== $this->user_list[$inputID]["id"]) {
 			return false;
 		}
 	}
 
 	public function getUserById($key) {
-		var_dump(User::$user_list[$key]);
-		return User::$user_list[$key];		
+		return $this->user_list[$key];		
 	}
 
 }
@@ -67,68 +71,48 @@ class ATM {
 		//id入力
 		echo "ユーザーIDを入力してください" . "\n";
 		$inputID = rtrim(fgets(STDIN));
-		$inputRes = $this->checkId($inputID);
+		$IDVali = new IDValidation;
+		$inputRes = $IDVali->check($inputID);
 		if ($inputRes === false) {
-			return $this->login();
-		}
-
-		//Userクラスのユーザーリストにidがあるかチェック
-          //なければエラー、再帰関数
-		$storageID = User::isExistUserId($inputID);
-		if($storageID === false) {
+			for ($i = 0;$i < is_countable($IDVali->getErrorMessage()); $i++) { 
+				echo implode(",", $IDVali->getErrorMessage());
+			}
 			return $this->login();
 		}
 
         //Userクラスから指定されたユーザー取得
-		$user = User::getUserById($inputID);
+		$userlist = new User;
+		$user = $userlist->getUserById($inputID);
 		$getId = $user["id"];
 
-		$this->loginPass();
-
-//取得したユーザーのパスワードと入力値が一致するかチェック
-        //なければエラー、再帰関数
-		$getPass = $user["password"];
-		if ($getPass !== $this->inputPass) {
-			echo "パスワードが一致しません。" . "\n";
-			return $this->loginPass();
-		}
+		var_dump($user);
+		$this->loginPass($user);
 
         //問題なければ、プロパティの$userにセット
 		$this->user = $user;
+
 	}
 
-	public function loginPass() {
+	public function loginPass($user) {
+
 		//パスワード取得
 		echo "パスワードを入力してください" . "\n";
-		$inputPass = $this->inputPass;
-		$this->inputPass = rtrim(fgets(STDIN));
-		$inputRes = $this->checkPass($this->inputPass);
-		if ($this->inputPass === false) {
-			return $this->loginPass();
-		}
-	}
-
-	public function checkId($inputID) {
-		if (!isset($inputID)) {
-			echo "IDを入力してください" . "\n";
-			return false;
+		$inputPass = rtrim(fgets(STDIN));
+		$PassVali = new PassValidation;
+		$inputRes = $PassVali->check($inputPass);
+		if ($inputRes === false) {
+			for ($i=0; $i < is_countable($PassVali->getErrorMessage()); $i++) { 
+				echo implode(",", $PassVali->getErrorMessage());
+			}
+			return $this->loginPass($user);
 		}
 
-		if (!is_numeric($inputID)) {
-			echo "IDは数字で入力してください" . "\n";
-			return false;
-		}
-	}
+		//取得したユーザーのパスワードと入力値が一致するかチェック
+		$getPass = $user["password"];
 
-	public function checkPass($inputPass) {
-		if (!isset($inputPass)) {
-			echo "パスワードを入力してください" . "\n";
-			return false;
-		}
-
-		if (!is_numeric($inputPass)) {
-			echo "パスワードは数字で入力してください" . "\n";
-			return false;
+		if ($getPass !== $inputPass) {
+			echo "パスワードが一致しません。" . "\n";
+			return $this->loginPass($user);
 		}
 	}
 
@@ -155,54 +139,64 @@ class ATM {
 		echo "1.残高照会 2.入金 3.引き出しの中から選択してください。";
 		
 		$input = rtrim(fgets(STDIN));
-		$checkres = $this->check($input);
-
+		$MenuVali = new MenuValidation;
+		$checkres = $MenuVali->check($input);
 		if($checkres === false) {
+			for ($i=0; $i < is_countable($MenuVali->getErrorMessage()); $i++) { 
+				echo implode(",", $MenuVali->getErrorMessage());
+			}
 			return $this->selectMenu();
 		}
 
 		return $input;
 	}
 
-	public function check($input) {//メニュー選択のバリデーション
-		if (!isset($input)) {
-			echo "1~3のいずれかを入力してください" . "\n";
-			return false;
-		}
-
-		if (!self::MENU_LIST[$input]) {
-			var_dump(self::MENU_LIST[$input]);
-			var_dump($input);
-			echo "1~3のいずれかで選択し直してください" . "\n";
-			return false;
-		}
-		return true;
-
-	}
 
 	public function balance() {//残高照会
 		$balance = $this->user["balance"];
-		echo "残高は" . $balance . "円です";
+		echo "残高は" . $balance . "円です" . "\n";
 		$this->replay();
 	}
 
 	public function deposit() {//入金
 		echo "いくら入金しますか?";
 		$deposit = rtrim(fgets(STDIN));
+
+		if (empty($deposit)) {
+			echo "認識できませんでした。もう一度入力してください。" . "\n";
+			return $this->deposit();
+		}
+
+		if (!is_numeric($deposit)) {
+			echo "数字で入力してください" . "\n";
+			return $this->deposit();
+		}
+		
 		echo $deposit . "円入金しました" . "\n";
 		$balance = $this->user["balance"];
 		$balance = $balance + $deposit;
-		echo "残高は" . $balance . "です。" . "\n";
+		echo "残高は" . $balance . "円です。" . "\n";
 		$this->replay();
 	}
 
 	public function withdrawl() {//出金
 		echo "いくら出金しますか?";
 		$withdrawl = rtrim(fgets(STDIN));
+
+		if (empty($withdrawl)) {
+			echo "認識できませんでした。もう一度入力してください。" . "\n";
+			return $this->withdrawl();
+		}
+
+		if (!is_numeric($withdrawl)) {
+			echo "数字で入力してください" . "\n";
+			return $this->withdrawl();
+		}
+
 		echo $withdrawl . "円引き出しました";
 		$balance = $this->user["balance"];
 		$balance = $balance - $withdrawl;
-		echo "残高は" . $balance . "です。" . "\n";
+		echo "残高は" . $balance . "円です。" . "\n";
 		$this->replay();
 	}
 
@@ -212,8 +206,12 @@ class ATM {
 		$inputReplay = rtrim(fgets(STDIN));
 
 		//入力内容確認
-		$inputRes = $this->checkReplayRes($inputReplay);
+		$ReResVali = new ReplayResValidation;
+		$inputRes = $ReResVali->check($inputReplay);
 		if ($inputRes === false) {
+			for ($i=0; $i < is_countable($ReResVali->getErrorMessage()); $i++) { 
+				echo implode(",", $ReResVali->getErrorMessage());
+			}
 			return $this->replay();
 		}
 
@@ -225,17 +223,6 @@ class ATM {
 		}
 	}
 
-	public function checkReplayRes($inputReplay) {
-		if (!isset($inputReplay)) {
-			echo "はいであればyを、いいえであればnを入力してください" . "\n";
-			return false;
-		}
-
-		if (!self::RES_MENU[$inputReplay]) {
-			echo "y:はい か n:いいえを入力してください" . "\n";
-			return false;
-		}
-	}
 }//class ATM
 
 $atm = new ATM;
