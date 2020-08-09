@@ -73,10 +73,12 @@ class ATM {
 		$inputID = rtrim(fgets(STDIN));
 		$IDVali = new IDValidation;
 		$inputRes = $IDVali->check($inputID);
+		$listcheckRes = $IDVali->UserListCheck($inputID);
 		if ($inputRes === false) {
-			for ($i = 0;$i < is_countable($IDVali->getErrorMessage()); $i++) { 
-				echo implode(",", $IDVali->getErrorMessage());
-			}
+			echo implode(",", $IDVali->getErrorMessage());
+			return $this->login();
+		}elseif ($listcheckRes !== true) {
+			echo implode(",", $IDVali->getErrorMessage());
 			return $this->login();
 		}
 
@@ -101,9 +103,7 @@ class ATM {
 		$PassVali = new PassValidation;
 		$inputRes = $PassVali->check($inputPass);
 		if ($inputRes === false) {
-			for ($i=0; $i < is_countable($PassVali->getErrorMessage()); $i++) { 
-				echo implode(",", $PassVali->getErrorMessage());
-			}
+			echo implode(",", $PassVali->getErrorMessage());
 			return $this->loginPass($user);
 		}
 
@@ -142,9 +142,7 @@ class ATM {
 		$MenuVali = new MenuValidation;
 		$checkres = $MenuVali->check($input);
 		if($checkres === false) {
-			for ($i=0; $i < is_countable($MenuVali->getErrorMessage()); $i++) { 
-				echo implode(",", $MenuVali->getErrorMessage());
-			}
+			echo implode(",", $MenuVali->getErrorMessage());
 			return $this->selectMenu();
 		}
 
@@ -209,9 +207,7 @@ class ATM {
 		$ReResVali = new ReplayResValidation;
 		$inputRes = $ReResVali->check($inputReplay);
 		if ($inputRes === false) {
-			for ($i=0; $i < is_countable($ReResVali->getErrorMessage()); $i++) { 
-				echo implode(",", $ReResVali->getErrorMessage());
-			}
+			echo implode(",", $ReResVali->getErrorMessage());
 			return $this->replay();
 		}
 
